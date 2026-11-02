@@ -1,0 +1,6 @@
+{
+  "name": "Number Grid Stitch Diary",
+  "description": "Offline Progressive Web App (PWA) for Number Grid and Stitch Diary with page navigation, calculations, and data backup.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

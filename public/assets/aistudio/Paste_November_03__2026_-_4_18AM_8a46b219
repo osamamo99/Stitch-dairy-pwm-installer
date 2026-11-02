@@ -1,0 +1,743 @@
+    <!DOCTYPE html>  <html lang="en">  
+<head>  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">  
+  <meta charset="UTF-8">  
+  <title>Number Grid with Save Feature</title>  
+  <link rel="manifest" href="manifest.json">  
+  <<style>  
+    :root {
+        --primary-color: #4a90e2;
+        --secondary-color: #f4f7f6;
+        --success-color: #2ecc71;
+        --danger-color: #e74c3c;
+        --text-color: #2c3e50;
+        --border-color: #d1d8e0;
+    }
+
+    body {  
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
+        text-align: center;  
+        margin: 0;
+        padding: 15px;
+        background-color: var(--secondary-color);
+        color: var(--text-color);
+    }  
+
+    h2 {
+        color: var(--text-color);
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    /* Container for table to allow horizontal scroll on mobile */
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        margin: 20px 0;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    table {  
+        width: 100%;  
+        border-collapse: collapse;  
+        min-width: 600px; /* Ensures it doesn't squash too much */
+    }  
+
+    th {  
+        background-color: #34495e;
+        color: white;
+        padding: 12px 8px;
+        font-size: 14px;
+        text-transform: uppercase;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }  
+
+    td {  
+        border: 1px solid var(--border-color);  
+        padding: 5px;
+        vertical-align: middle;
+    }  
+
+    textarea {  
+          width: 120px; 
+          min-height: 50px;
+          text-align: center;  
+          border: 1px solid #ddd;  
+          border-radius: 4px;
+          font-size: 16px;  
+          background: #f9f9f9;  
+          resize: both !important; /* Manual handle ke liye */
+          overflow: hidden; 
+          padding: 5px;  
+          display: block;
+          margin: auto;
+          box-sizing: border-box;
+      }
+
+    textarea:focus {  
+        outline: none;
+        background-color: white;
+        border-color: var(--primary-color);
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }  
+
+    .total-row {  
+        font-weight: bold;  
+        background-color: #ecf0f1;  
+    }  
+
+    .static-box {  
+        background-color: #dcdde1;  
+        font-weight: bold;  
+    }  
+
+    /* Buttons Style */
+    button {
+        border-radius: 6px;
+        font-weight: 600;
+        transition: transform 0.1s, opacity 0.2s;
+        cursor: pointer;
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        font-size: 14px;
+    }
+
+    button:active {
+        transform: scale(0.96);
+    }
+
+    .save-btn { background-color: var(--success-color); color: white; box-shadow: 0 3px 0 #27ae60; }
+    .clear-btn { background-color: var(--danger-color); color: white; box-shadow: 0 3px 0 #c0392b; }
+    
+    #undoBtn { background-color: #f39c12; color: white; box-shadow: 0 3px 0 #e67e22; }
+    #undoBtn:disabled { background-color: #bdc3c7; box-shadow: none; cursor: not-allowed; }
+
+    .pagination { margin-top: 25px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .pagination button { background-color: #34495e; color: white; }
+
+    /* Inputs & Selects */
+    select, input[type="number"], input[type="date"] {
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 15px;
+        outline: none;
+    }
+
+    .search-box { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+    .note-box {  
+        width: 100%;  
+        height: 100px !important;  
+        margin: 10px 0;  
+        border: 1px solid var(--border-color);  
+        background-color: white;
+        resize: vertical;
+        text-align: left;
+    }  
+
+    #folderTotalsSummary {  
+        margin-top: 30px;  
+        padding: 20px;  
+        border: none;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        width: 100%;
+        box-sizing: border-box;
+    }  
+
+    #folderSummaryContent div {
+        padding: 8px;
+        border-bottom: 1px solid #f1f1f1;
+        font-size: 14px;
+    }
+
+    .bonus-section {
+        background: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+</style>
+</head>  
+<body>  <h2>Number Grid with Save Feature</h2>  <div>  
+    <label>Select Folder:</label>  
+    <select id="folderSelect" onchange="changeFolder()">
+    <option value="Folder1">Folder 1</option>
+    <option value="Folder2">Folder 2</option>
+    <option value="Folder3">Folder 3</option>
+    <option value="Folder4">Folder 4</option>
+    <option value="Folder5">Folder 5</option>
+    <option value="Folder6">Folder 6</option>
+    <option value="Folder7">Folder 7</option>
+    <option value="Folder8">Folder 8</option>
+    <option value="Folder9">Folder 9</option>
+    <option value="Folder10">Folder 10</option>
+    <option value="Folder11">Folder 11</option>
+    <option value="Folder12">Folder 12</option>
+</select>  
+</div>  <div class="search-box">  
+    <label>Search Page:</label>  
+    <input type="number" id="pageSearch" min="1" max="40">  
+    <button onclick="searchPage()">Go</button>  
+</div>  <table>  
+    <thead>  
+        <tr>  
+            <th>Date</th>  
+            <th>Round</th>  
+            <th>Current</th>  
+            <th>Stitch</th>  
+            <th>Color</th>  
+            <th>Name</th>  
+        </tr>  
+    </thead>  
+    <tbody id="grid"></tbody>  
+    <tfoot>  
+        <tr class="total-row">  
+            <td class="static-box">Total</td>  
+            <td id="total1">0</td>  
+            <td id="total2">0</td>  
+            <td id="total3">0</td>  
+            <td id="total4">0</td>  
+            <td id="total5">0</td>  
+        </tr>  
+    </tfoot>  
+</table>  <button class="save-btn" onclick="saveData()">Save</button>
+<button class="clear-btn" onclick="clearCurrentPage()">Clear</button>
+<button class="clear-btn" id="undoBtn" onclick="undoClear()" disabled>Undo Clear</button>
+
+<!-- Export aur Import Buttons -->
+<div style="margin-top: 15px; padding: 10px; border: 1px dashed #4a90e2; border-radius: 8px; background: #fff;">
+    <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 14px; color: #34495e;">Data Backup Manager</p>
+    <button onclick="exportData()" style="background-color: #3498db; color: white;">📥 Export Data (Download)</button>
+    <button onclick="document.getElementById('importFile').click()" style="background-color: #9b59b6; color: white;">📤 Import Data (Upload)</button>
+    <input type="file" id="importFile" style="display:none" onchange="importData(event)" accept=".json">
+</div>
+
+<div class="pagination">  
+    <button onclick="prevPage()">Previous</button>  
+    <span>Page: <span id="currentPage">1</span> / <span id="totalPagesSpan">40</span></span>  
+    <button onclick="nextPage()">Next</button>  
+</div>  <div class="note-section">  
+    <label>Note:</label>  
+    <textarea id="note" class="note-box" placeholder="Write your note here..."></textarea>  
+</div>  <div style="margin-top: 20px;">  
+    <button onclick="toggleHelperBonus()" class="save-btn" style="background-color: #444;">Helper Rs 5000</button>  
+    <button onclick="toggleHazriBonus()" class="save-btn" style="background-color: #888;">Hazri Rs 1000</button>  
+</div>  <div style="margin-top: 10px;">  
+    <label for="sundayCount">Number of Sundays:</label>  
+    <input type="number" id="sundayCount" min="0" value="0" oninput="updateFolderSummary()" style="width: 60px; padding: 5px; font-size: 16px;">  
+    <span style="margin-left: 10px;">(Rs 300 per Sunday)</span>  
+</div>  <div id="folderTotalsSummary">  
+    <h3>Folder Page Totals Summary</h3>  
+    <div id="folderSummaryContent"></div>  
+</div> 
+
+<!-- Danger Zone: Folder Delete Section -->
+<div style="margin-top: 50px; padding: 20px; border: 2px solid #e74c3c; border-radius: 12px; background-color: #fdf2f2;">
+    <h4 style="color: #e74c3c; margin-top: 0;">⚠️ Danger Zone (Ehtiyat!)</h4>
+    <p style="font-size: 13px; color: #666;">Niche wala button dabane se maujooda (Current) Folder ke tamam 40 pages ka data hamesha ke liye delete ho jayega.</p>
+    <button onclick="deleteFullFolder()" style="background-color: #e74c3c; color: white; padding: 12px 25px; font-weight: bold; border-radius: 8px; box-shadow: 0 4px 0 #c0392b;">
+        🚨 Delete Full Current Folder
+    </button>
+</div>
+
+<script>  
+    const totalPages = 40;  
+    let currentPage = 1;  
+    let currentFolder = "Folder1";  
+    const grid = document.getElementById("grid");  
+    const cols = 5;  
+    let lastClearedData = null;  
+  
+    function changeFolder() {  
+    saveData();  
+    currentFolder = document.getElementById("folderSelect").value;  
+    localStorage.setItem("lastOpenedFolder", currentFolder); // ✅ Save folder  
+    loadPage(1);  
+}  
+  
+    function loadPage(page) {  
+        if (page < 1 || page > totalPages) return;  
+        currentPage = page;  
+        document.getElementById("currentPage").textContent = currentPage;
+        
+        document.getElementById("totalPagesSpan").textContent = totalPages;
+        
+        grid.innerHTML = "";  
+  
+        let row = document.createElement("tr");  
+  
+        let dateCell = document.createElement("td");  
+        let dateInput = document.createElement("input");  
+        dateInput.type = "date";  
+        dateInput.id = "dateInput";  
+        dateCell.appendChild(dateInput);  
+        row.appendChild(dateCell);  
+        
+        dateInput.onchange = function () {
+    const selectedDate = new Date(this.value);
+    if (selectedDate.getDay() === 0) { // 0 = Sunday
+        document.getElementById("sundayCount").value = 1;
+    } else {
+        document.getElementById("sundayCount").value = 0;
+    }
+};
+  
+        for (let j = 0; j < cols; j++) {
+    let cell = document.createElement("td");
+    let textarea = document.createElement("textarea");
+    textarea.dataset.column = j;
+    
+    textarea.oninput = function() {
+        // AUTO HEIGHT: Likhne par box bada hoga
+        this.style.height = "auto";
+        this.style.height = (this.scrollHeight) + "px";
+        calculateTotal();
+    };
+    
+    cell.appendChild(textarea);
+    row.appendChild(cell);
+}  
+  
+        grid.appendChild(row);  
+        loadData();  
+        updateFolderSummary();  
+    }  
+  
+    function nextPage() {  
+        if (currentPage < totalPages) {  
+            saveData();  
+            loadPage(currentPage + 1);  
+            saveLastOpenedPage();  
+        }  
+    }  
+  
+    function prevPage() {  
+        if (currentPage > 1) {  
+            saveData();  
+            loadPage(currentPage - 1);  
+            saveLastOpenedPage();  
+        }  
+    }  
+  
+    function searchPage() {  
+        let page = parseInt(document.getElementById("pageSearch").value);  
+        if (!isNaN(page) && page >= 1 && page <= totalPages) {  
+            saveData();  
+            loadPage(page);  
+            saveLastOpenedPage();  
+        }  
+    }  
+  
+    function calculateTotal() {  
+        let totals = Array(cols).fill(0);  
+        let subtractionValues = Array(cols).fill(0);  
+        let forwardValues = Array(cols).fill(0);  
+  
+        let textareas = document.querySelectorAll("textarea");  
+  
+        textareas.forEach(textarea => {  
+            let colIndex = parseInt(textarea.dataset.column);  
+            let values = textarea.value.split("\n");  
+  
+            let sum = 0;  
+            values.forEach(val => {  
+                val = val.trim();  
+  
+                if (val.startsWith("+")) return;  
+                if (val.endsWith("+")) {  
+                    let num = parseFloat(val.replace("+", "").trim()) || 0;  
+                    if (colIndex < cols - 1) forwardValues[colIndex + 1] += num;  
+                    return;  
+                }  
+  
+                if (val.endsWith("-")) {  
+                    let num = parseFloat(val.replace("-", "").trim()) || 0;  
+                    subtractionValues[colIndex] += num;  
+                } else {  
+                    let num = parseFloat(val) || 0;  
+                    sum += num;  
+                }  
+            });  
+  
+            totals[colIndex] += sum;  
+        });  
+  
+        for (let i = 0; i < cols - 1; i++) {  
+            totals[i + 1] += forwardValues[i + 1];  
+            totals[i + 1] -= subtractionValues[i];  
+        }  
+  
+        for (let i = 0; i < cols; i++) {  
+            document.getElementById(`total${i + 1}`).textContent = totals[i];  
+        }  
+    }  
+  
+    function saveData() {
+    let pageData = {
+        date: document.getElementById("dateInput").value,
+        values: [],
+        sizes: [],
+        note: document.getElementById("note").value,
+        sundays: parseInt(document.getElementById("sundayCount").value) || 0
+    };
+    document.querySelectorAll("textarea[data-column]").forEach(textarea => {
+        pageData.values.push(textarea.value);
+        // Manual set ki hui width aur height save kar rahe hain
+        pageData.sizes.push({ w: textarea.style.width, h: textarea.style.height });
+    });
+    localStorage.setItem(`${currentFolder}_pageData_${currentPage}`, JSON.stringify(pageData));
+    updateFolderSummary();
+}
+  
+    function loadData() {
+    let savedData = localStorage.getItem(`${currentFolder}_pageData_${currentPage}`);
+    if (savedData) {
+        let pageData = JSON.parse(savedData);
+        document.getElementById("dateInput").value = pageData.date || "";
+        document.getElementById("note").value = pageData.note || "";
+        document.getElementById("sundayCount").value = pageData.sundays || 0;
+        let textareas = document.querySelectorAll("textarea[data-column]");
+        textareas.forEach((textarea, index) => {
+            textarea.value = pageData.values[index] || "";
+            // Manual size load karna
+            if (pageData.sizes && pageData.sizes[index]) {
+                if (pageData.sizes[index].w) textarea.style.width = pageData.sizes[index].w;
+                if (pageData.sizes[index].h) textarea.style.height = pageData.sizes[index].h;
+            }
+            // Agar manual height nahi hai to auto-expand content ke mutabiq
+            if (!textarea.style.height || textarea.style.height === "50px") {
+                textarea.style.height = "auto";
+                textarea.style.height = (textarea.scrollHeight) + "px";
+            }
+        });
+        calculateTotal();
+    }
+}
+  
+    function clearCurrentPage() {  
+        lastClearedData = {  
+            date: document.getElementById("dateInput").value,  
+            note: document.getElementById("note").value,  
+            values: [],  
+            sizes: []  
+        };  
+  
+        let textareas = document.querySelectorAll("textarea");  
+        textareas.forEach(textarea => {  
+            lastClearedData.values.push(textarea.value);  
+            lastClearedData.sizes.push({ width: textarea.style.width, height: textarea.style.height });  
+            textarea.value = "";  
+            textarea.style.width = "100px";  
+            textarea.style.height = "50px";  
+        });  
+  
+        document.getElementById("dateInput").value = "";  
+        document.getElementById("note").value = "";  
+        localStorage.removeItem(`${currentFolder}_pageData_${currentPage}`);  
+        calculateTotal();  
+        document.getElementById("undoBtn").disabled = false;  
+        updateFolderSummary();  
+    }  
+  
+    function undoClear() {  
+        if (!lastClearedData) return;  
+  
+        document.getElementById("dateInput").value = lastClearedData.date || "";  
+        document.getElementById("note").value = lastClearedData.note || "";  
+  
+        let textareas = document.querySelectorAll("textarea");  
+        textareas.forEach((textarea, index) => {  
+            textarea.value = lastClearedData.values[index] || "";  
+            textarea.style.width = lastClearedData.sizes[index]?.width || "100px";  
+            textarea.style.height = lastClearedData.sizes[index]?.height || "50px";  
+        });  
+  
+        calculateTotal();  
+        saveData();  
+        lastClearedData = null;  
+        document.getElementById("undoBtn").disabled = true;  
+    }  
+      
+// Bonus toggles  
+let helperBonusEnabled = false;  
+let hazriBonusEnabled = false;  
+  
+function toggleHelperBonus() {  
+    helperBonusEnabled = !helperBonusEnabled;  
+    updateFolderSummary();  
+}  
+  
+function toggleHazriBonus() {  
+    hazriBonusEnabled = !hazriBonusEnabled;  
+    updateFolderSummary();  
+}  
+  
+    function updateFolderSummary() {  
+    const summaryDiv = document.getElementById("folderSummaryContent");  
+    summaryDiv.innerHTML = "";  
+    
+    
+    let bonusAmount = 0; 
+    let bonus350Pages = 0;
+let bonus400Pages = 0;
+    let grandTotal = 0;  
+    let bonusPagesCount = 0;  
+      
+    for (let i = 1; i <= totalPages; i++) {  
+        let savedData = localStorage.getItem(`${currentFolder}_pageData_${i}`);  
+        if (savedData) {  
+            let pageData = JSON.parse(savedData);  
+            let stitchTotal = 0;  
+            let stitchForwardFromCurrent = 0;  
+            let stitchMinusFromCurrent = 0;  
+              
+            if (pageData.values && pageData.values.length >= 3) {  
+                const currentLines = pageData.values[1]?.split("\n") || [];  
+                const stitchLines = pageData.values[2]?.split("\n") || [];  
+                  
+                currentLines.forEach(line => {  
+                    line = line.trim();  
+                    if (line.endsWith("+")) {  
+                        stitchForwardFromCurrent += parseFloat(line.replace("+", "")) || 0;  
+                    } else if (line.endsWith("-")) {  
+                        stitchMinusFromCurrent += parseFloat(line.replace("-", "")) || 0;  
+                    }  
+                });  
+                  
+                stitchLines.forEach(line => {  
+                    line = line.trim();  
+                    if (line.startsWith("+") || line.endsWith("+") || line.endsWith("-")) return;  
+                    stitchTotal += parseFloat(line) || 0;  
+                });  
+                  
+                stitchTotal = stitchTotal + stitchForwardFromCurrent - stitchMinusFromCurrent;  
+            }  
+              
+            grandTotal += stitchTotal;  
+              
+            // Bonus calculation per page
+if (stitchTotal >= 400000) {
+    bonusAmount += 200;
+    bonus400Pages++;
+} else if (stitchTotal >= 350000) {
+    bonusAmount += 150;
+    bonus350Pages++;
+}
+              
+            const pageDate = pageData.date || "No Date";
+let sundayMark = "";
+
+let noteMark = "";
+if (pageData.note && pageData.note.trim() !== "") {
+    noteMark = " 📝";
+}
+
+if (pageData.date && pageData.sundays > 0) {
+    const day = new Date(pageData.date).getDay();
+    if (day === 0) { // 0 = Sunday
+        sundayMark = " ✅";
+    }
+}
+
+const div = document.createElement("div");
+div.innerHTML = `Page ${i} (${pageDate}): Stitch Total = <b>${stitchTotal.toLocaleString()}</b>${sundayMark}${noteMark}`;
+summaryDiv.appendChild(div);  
+        }  
+    }  
+      
+    // 📌 Final grand total line  
+    const grandTotalDiv = document.createElement("div");  
+    grandTotalDiv.style.marginTop = "10px";  
+    grandTotalDiv.style.fontWeight = "bold";
+    
+    grandTotalDiv.style.borderTop = "2px solid #000";  
+    grandTotalDiv.style.paddingTop = "8px";  
+    grandTotalDiv.textContent = `📌 Total Stitch (Folder): ${grandTotal}`;  
+    summaryDiv.appendChild(grandTotalDiv);  
+      
+    // Rs calculation based on 100000 stitch = Rs 270  
+const ratePerStitch = 270 / 100000;  
+const basicEarning = grandTotal * ratePerStitch;  
+const bonusEarning = bonusAmount;  
+  
+let totalSundays = 0;
+
+for (let i = 1; i <= totalPages; i++) {
+    let savedData = localStorage.getItem(`${currentFolder}_pageData_${i}`);
+    if (savedData) {
+        let pageData = JSON.parse(savedData);
+        totalSundays += pageData.sundays || 0;
+    }
+}
+
+let sundayBonus = totalSundays * 300;  
+  
+let tenMillionBonus = grandTotal >= 10000000 ? 1000 : 0;  
+let helperBonus = helperBonusEnabled ? 5000 : 0;  
+let hazriBonus = hazriBonusEnabled ? 1000 : 0;  
+  
+const totalRs = Math.round(basicEarning + bonusEarning + tenMillionBonus + helperBonus + hazriBonus + sundayBonus);  
+  
+const rupeeDiv = document.createElement("div");
+rupeeDiv.style.fontWeight = "900";
+rupeeDiv.style.color = "#000000";
+rupeeDiv.style.fontSize = "18px"; // Earning ko bara dikhane ke liye
+rupeeDiv.style.marginTop = "8px";
+rupeeDiv.style.padding = "5px";
+rupeeDiv.style.backgroundColor = "#e1f5fe"; // Light blue background taake saaf nazar aaye
+
+let bonusDetails = `Rs ${Math.round(basicEarning)} + Bonus Rs ${bonusEarning} `;
+
+if (bonus350Pages > 0) {
+    bonusDetails += ` | ${bonus350Pages} page(s) ≥350k`;
+}
+if (bonus400Pages > 0) {
+    bonusDetails += ` | ${bonus400Pages} page(s) ≥400k`;
+}  
+  
+if (tenMillionBonus > 0) bonusDetails += ` + Rs 1000 for 10 million stitches`;  
+if (sundayBonus > 0) bonusDetails += ` + Rs ${sundayBonus} for ${totalSundays} Sunday(s)`;  
+if (helperBonus > 0) bonusDetails += ` + Rs 5000 helper`;  
+if (hazriBonus > 0) bonusDetails += ` + Rs 1000 hazri`;  
+  
+rupeeDiv.innerHTML = `💰 Estimated Earning: Rs ${totalRs} (${bonusDetails})`;  
+  
+summaryDiv.appendChild(rupeeDiv);  
+}  
+  
+    function saveLastOpenedPage() {  
+    localStorage.setItem("lastOpenedPage", currentPage);  
+    localStorage.setItem("lastOpenedFolder", currentFolder); // ✅ Save folder  
+}  
+  
+    function loadLastOpenedPage() {  
+    const savedFolder = localStorage.getItem("lastOpenedFolder") || "Folder1";  
+    currentFolder = savedFolder;  
+    document.getElementById("folderSelect").value = currentFolder;  
+      
+    const savedPage = localStorage.getItem("lastOpenedPage");  
+    if (savedPage) {  
+        loadPage(parseInt(savedPage));  
+    } else {  
+        loadPage(1);  
+    }  
+}  
+  
+    loadLastOpenedPage();  
+</script>  <script>  
+    if ("serviceWorker" in navigator) {  
+        window.addEventListener("load", () => {  
+            navigator.serviceWorker.register("service-worker.js")  
+                .then((reg) => console.log("Service Worker Registered:", reg.scope))  
+                .catch((err) => console.log("Service Worker Registration Failed:", err));  
+        });  
+    }  
+    
+    // --- DATA EXPORT FUNCTION ---
+function exportData() {
+    let allData = {};
+    // LocalStorage ka saara data akatha karna
+    for (let i = 0; i < localStorage.length; i++) {
+        let key = localStorage.key(i);
+        allData[key] = localStorage.getItem(key);
+    }
+
+    if (Object.keys(allData).length === 0) {
+        alert("Export karne ke liye koi data nahi mila!");
+        return;
+    }
+
+    // JSON file banana
+    const dataStr = JSON.stringify(allData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
+    // Download link bana kar click karna
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `stitch_diary_backup_${new Date().toLocaleDateString()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    alert("✅ Data backup file download ho gayi hai!");
+}
+
+// --- DATA IMPORT FUNCTION ---
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            
+            // Confirm mangna taake galti se data ud na jaye
+            const confirmAction = confirm("⚠️ CHE चेतावनी (Warning): \nImport karne se aapka maujooda (current) saara data delete ho jayega aur file wala data load ho jayega. \n\nKya aap jari rakhna chahte hain?");
+            
+            if (confirmAction) {
+                localStorage.clear(); // Purana data saaf karna
+                
+                // Naya data LocalStorage mein dalna
+                for (let key in importedData) {
+                    localStorage.setItem(key, importedData[key]);
+                }
+                
+                alert("✅ Data successfully import ho gaya hai! Page refresh ho raha hai...");
+                location.reload(); // App ko naye data ke sath restart karna
+            }
+        } catch (err) {
+            alert("❌ Galti: File sahi nahi hai ya data corrupt hai.");
+            console.error(err);
+        }
+    };
+    reader.readAsText(file);
+    // Reset file input taake dubara wahi file select ki ja sake
+    event.target.value = "";
+}
+
+// --- DELETE FULL FOLDER FUNCTION ---
+function deleteFullFolder() {
+    // Pehli Confirmation
+    let confirm1 = confirm("⚠️ WARNING!\nKya aap waqai poora '" + currentFolder + "' delete karna chahte hain?\nIs folder ke tamam 40 pages ka data khatam ho jayega.");
+    
+    if (confirm1) {
+        // Dusri FINAL Confirmation (Safety ke liye)
+        let confirm2 = confirm("❌ FINAL WARNING!\nData wapis nahi ayega. Kya aap waqai delete karna chahte hain?");
+        
+        if (confirm2) {
+            let keysToRemove = [];
+            
+            // LocalStorage mein se sirf is folder ki keys dhoondna
+            for (let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                // Agar key FolderName se shuru ho rahi ho (e.g., Folder1_pageData_...)
+                if (key.startsWith(currentFolder + "_")) {
+                    keysToRemove.push(key);
+                }
+            }
+
+            // Sab keys ko delete karna
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+            });
+
+            alert("✅ " + currentFolder + " ka sara data delete kar diya gaya hai.");
+            
+            // Page 1 load karna taake UI update ho jaye
+            loadPage(1); 
+        }
+    }
+}
+</script>  </body>  
+</html>
